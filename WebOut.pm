@@ -13,7 +13,7 @@
 #   including module, all works correctly and transparently.
 #
 package CGI::WebOut;
-our $VERSION = "2.10";
+our $VERSION = "2.20";
 
 use strict;
 use Exporter; our @ISA=qw(Exporter);
@@ -50,6 +50,7 @@ sub ER_Err2Plain { 3 }            # То же, но в виде plain-текста
 ##
 ## Внутренние переменные
 ##
+#our $DEBUG = "/wo";              # отладочный режим - задает имя файла.
 our $DEBUG = undef;              # отладочный режим - задает имя файла.
 our $UseAutoflush = 1;           # Режим автосброса включен
 our $HeadersSent = 0;            # признак: заголовки уже посланы
@@ -314,8 +315,10 @@ sub import {
 # корректно (см. _RealPrint).
 sub END {
 	return if !tied(*STDOUT) || ref tied(*STDOUT) ne __PACKAGE__."::Tie";
-	CGI::WebOut::_Debug("END");
-	untie(*STDOUT);
+	CGI::WebOut::_Debug("CGI::WebOut::END");
+	my $this = tied(*STDOUT);
+	my ($handle, $obj) = ($this->{handle}, $this->{prevObj});
+	CGI::WebOut::Tie::tieobj(*$handle, $obj) 
 }
 
 
@@ -327,7 +330,11 @@ sub _RealPrint {
 	my $txt = join("", @_);
 	return if $txt eq "";
 	if ($obj) { 
-		return $obj->parentPrint(@_) 
+		if (ref $obj eq "CGI::WebOut::Tie") {
+			return $obj->parentPrint(@_) 
+		} else {
+			print STDOUT @_;
+		}
 	} else {
 		# Sometimes, during global destruction, STDOUT is already untied
 		# but print still does not work. I don't know, why. This workaround
@@ -395,7 +402,8 @@ package CGI::WebOut::Tie;
 
 # The same as tie(), but ties existed object to the handle.
 sub tieobj { 
-	return tie($_[0], "CGI::WebOut::TieMediator", $_[1]) 
+#	return $_[1]? tie($_[0], "CGI::WebOut::TieMediator", $_[1]) : untie($_[0]); 
+	return tie($_[0], "CGI::WebOut::TieMediator", $_[1]); 
 }
 
 ## Fully overriden methods.
@@ -461,6 +469,7 @@ sub UNTIE
 sub parentPrint
 {	my $this = shift;
 	my $params = \@_;
+	CGI::WebOut::_Debug("parentPrint('%s')", join "", @$params);
 	$this->parentCall(sub { print STDOUT @$params });
 }
 
@@ -479,7 +488,8 @@ sub parentCall
 		local $^W;
 		untie(*$handle);
 	}
-	my @result = wantarray? $sub->() : scalar $sub->();
+	CGI::WebOut::_Debug("parentCall for STDOUT=%s", $obj);
+	my @result = eval { wantarray? $sub->() : scalar $sub->() };
 	if ($save) {
 		tieobj(*$handle, $save);
 	} elsif ($obj) {
