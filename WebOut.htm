@@ -1,0 +1,210 @@
+<HTML>
+<HEAD>
+<TITLE>CGI::WebOut - Perl extension to handle CGI output.</TITLE>
+<LINK REV="made" HREF="mailto:">
+</HEAD>
+
+<BODY>
+
+<A NAME="__index__"></A>
+<!-- INDEX BEGIN -->
+
+<UL>
+
+	<LI><A HREF="#name">NAME</A></LI>
+	<LI><A HREF="#synopsis">SYNOPSIS</A></LI>
+	<LI><A HREF="#description">DESCRIPTION</A></LI>
+	<UL>
+
+		<LI><A HREF="#new features in version 2.0">New features in version 2.0</A></LI>
+		<LI><A HREF="#export">EXPORT</A></LI>
+	</UL>
+
+	<LI><A HREF="#examples">EXAMPLES</A></LI>
+	<LI><A HREF="#description">DESCRIPTION</A></LI>
+	<LI><A HREF="#author">AUTHOR</A></LI>
+	<LI><A HREF="#see also">SEE ALSO</A></LI>
+</UL>
+<!-- INDEX END -->
+
+<HR>
+<P>
+<H1><A NAME="name">NAME</A></H1>
+<P>CGI::WebOut - Perl extension to handle CGI output (in PHP-style).</P>
+<P>
+<HR>
+<H1><A NAME="synopsis">SYNOPSIS</A></H1>
+<PRE>
+  # Simple CGI script (no 500 Apache error!)
+  use CGI::WebOut;
+  print &quot;Hello world!&quot;; # wow, we may NOT output Content-type!
+  # Handle output for {}-block
+  my $str=grab {
+    print &quot;Hi there!\n&quot;;
+  };
+  $str=~s/\n/&lt;br&gt;/sg;
+  print $str;</PRE>
+<P>
+<HR>
+<H1><A NAME="description">DESCRIPTION</A></H1>
+<P>This module is used to make CGI programmer's work more comfortable. 
+The main idea is to handle output stream (<CODE>STDOUT</CODE>) to avoid any data 
+to be sent to browser without <CODE>Content-type</CODE> header. Of cource,
+you may also send your own headers to browser using <A HREF="#item_Header"><CODE>Header()</CODE></A>. Any 
+errors or warnings in your script will be printed at the bottom of the page 
+``in PHP-style''. You may also use <CODE>Carp</CODE> module together with <CODE>CGI::WebOut</CODE>.</P>
+<P>You may also handle any program block's output (using <CODE>print</CODE> etc.)
+and place it to the variable using <CODE>grab {...}</CODE> subroutine. It is a 
+very useful feature for lots of CGI-programmers.</P>
+<P>The last thing - support of <CODE>try-catch</CODE> ``instruction''. <STRONG>WARNING:</STRONG> they 
+are <EM>not</EM> real instructions, like <CODE>map {...}</CODE>, <CODE>grep {...}</CODE> etc.! Be careful
+with <CODE>return</CODE> instruction in <CODE>try-catch</CODE> blocks.</P>
+<P>Note: you may use <CODE>CGI::WebOut</CODE> outside the field of CGI scripting. In ``non-CGI'' 
+script headers are NOT output, and warnings are shown as plain-text. 
+<CODE>grab {...}</CODE>, <CODE>try-catch</CODE> etc. work as usual.</P>
+<P>
+<H2><A NAME="new features in version 2.0">New features in version 2.0</A></H2>
+<P>Since version 2.0 module if fully tie-safe. That means the code:</P>
+<PRE>
+  tie(*STDOUT, &quot;T&quot;);
+  eval &quot;use CGI::WebOut&quot;;
+  print &quot;OK!&quot;;
+  untie(*STDOUT);</PRE>
+<P>generates <EM>exactly</EM> the same sequense of T method calls as:</P>
+<PRE>
+  tie(*STDOUT, &quot;T&quot;);
+  print &quot;OK!&quot;;
+  untie(*STDOUT);</PRE>
+<P>So you can use CGI::WebOut with, for example, FastCGI module.</P>
+<P>
+<H2><A NAME="export">EXPORT</A></H2>
+<P>All the useful functions. Larry says it is not a good idea, 
+but Rasmus does not think so.</P>
+<P>
+<HR>
+<H1><A NAME="examples">EXAMPLES</A></H1>
+<PRE>
+  # Using Header()
+  use CGI::WebOut;
+  NoAutoflush();
+  print &quot;Hello world!&quot;
+  Header(&quot;X-Powered-by: dklab&quot;);</PRE>
+<PRE>
+  # Handle output buffer
+  use CGI::WebOut;
+  my $str=grab {
+    print &quot;Hi there!\n&quot;;
+        # Nested grab!
+        my $s=grab {
+                print &quot;This string will be redirect to variable!&quot;;
+        }
+  }
+  $str=~s/\n/&lt;br&gt;/sg;</PRE>
+<PRE>
+  # Exception/warnings handle
+  use CGI::WebOut;
+  try {
+    DoSomeDangerousStuff();
+  } catch {
+    print &quot;An error occured: $_&quot;;
+        throw &quot;Error&quot;;
+  } warnings {
+    print &quot;Wanning &amp; error messages:&quot;.join(&quot;\n&quot;,@_);
+  };</PRE>
+<P>
+<HR>
+<H1><A NAME="description">DESCRIPTION</A></H1>
+<DL>
+<DT><STRONG><A NAME="item_use_CGI%3A%3AWebOut_%5B%28%24forgotAboutHeaders%29"><CODE>use CGI::WebOut [($forgotAboutHeaders)]</CODE></A></STRONG><BR>
+<DD>
+Handles the <CODE>STDOUT</CODE> to avoid document output without <CODE>Content-type</CODE> header in ``PHP-style''. If <CODE>$forgotAboutHeaders</CODE> is true, following ``print'' will produse output of all HTTP headers. Use this options only in FastCGI environment.
+<P></P>
+<DT><STRONG><A NAME="item_string_grab_%7B_%2E%2E%2E_%7D"><CODE>string grab { ... }</CODE></A></STRONG><BR>
+<DD>
+Handles output stream. Usage:
+<PRE>
+    $grabbed = grab { 
+        print 'Hello!' 
+    } catch { 
+        die &quot;An error occurred while grabbing the output: $@&quot;; 
+    };</PRE>
+<P>or simply</P>
+<PRE>
+    $grabbed = grab { print 'Hello!' };</PRE>
+<P></P>
+<DT><STRONG><A NAME="item_bool_try_%7B%2E%2E%2E%7D_catch_%7B%2E%2E%2E%7D_war"><CODE>bool try {...} catch {...} warnings {...}</CODE></A></STRONG><BR>
+<DD>
+Try-catch preudo-instruction. Usage:
+<PRE>
+    try { 
+       some dangeorus code, which may call die() or
+       any other bad function (or throw &quot;instruction&quot;)
+    } catch {
+       use $_ to get the exception or error message
+    } warnings {
+       use @_ to get all the warning messages
+    }</PRE>
+<P>Note: <CODE>catch</CODE> and <CODE>warnings</CODE> blocks are optional and called in 
+order of their appearance.</P>
+<P></P>
+<DT><STRONG><A NAME="item_throw"><CODE>void throw($exception_object)</CODE></A></STRONG><BR>
+<DD>
+Throws an exception.
+<P></P>
+<DT><STRONG><A NAME="item_ErrorReporting"><CODE>int ErrorReporting([int $level])</CODE></A></STRONG><BR>
+<DD>
+Sets the error handling mode. <CODE>$level</CODE> may be:
+<PRE>
+    ER_NoErr       - no error reporting;
+    ER_Err2Browser - errors are printed to browser;
+    ER_Err2Comment - errors are printed to browser inside &lt;!-- ... --&gt;;
+    ER_Err2Plain   - plain-text warnings.</PRE>
+<P>Returns the previous error reporting mode.</P>
+<P></P>
+<DT><STRONG><A NAME="item_Header"><CODE>void Header(string $header)</CODE></A></STRONG><BR>
+<DD>
+Sets document responce header. If autoflush mode is not set, this 
+function may be used just <EM>before</EM> the first output.
+<P></P>
+<DT><STRONG><A NAME="item_SetAutoflush"><CODE>int SetAutoflush([bool $mode])</CODE></A></STRONG><BR>
+<DD>
+Sets the autoflush mode (<CODE>$mode</CODE>!=0) or disables if (<CODE>$mode</CODE>=0). Returns the
+previous status of autoflush mode.
+<P></P>
+<DT><STRONG><A NAME="item_NoAutoflush"><CODE>int NoAutoflush()</CODE></A></STRONG><BR>
+<DD>
+Equivalents to <A HREF="#item_SetAutoflush"><CODE>SetAutoflush(0)</CODE></A>.
+<P></P>
+<DT><STRONG><A NAME="item_UseAutoflush"><CODE>int UseAutoflush()</CODE></A></STRONG><BR>
+<DD>
+Equivalents to <A HREF="#item_SetAutoflush"><CODE>SetAutoflush(1)</CODE></A>.
+<P></P>
+<DT><STRONG><A NAME="item_Flush"><CODE>void Flush()</CODE></A></STRONG><BR>
+<DD>
+Flushes the main output buffer to browser. If autoflush mode is set,
+this function is called automatically after each <CODE>print</CODE> call.
+<P></P>
+<DT><STRONG><A NAME="item_Redirect"><CODE>void Redirect(string $URL)</CODE></A></STRONG><BR>
+<DD>
+Sends <CODE>Location: $URL</CODE> header to redirect the browser to <CODE>$URL</CODE>. Also finishes the script with <CODE>exit()</CODE> call.
+<P></P>
+<DT><STRONG><A NAME="item_ExternRedirect"><CODE>void ExternRedirect(string $URL)</CODE></A></STRONG><BR>
+<DD>
+The same as <A HREF="#item_Redirect"><CODE>Redirect()</CODE></A>, but first translates <CODE>$URL</CODE> to absolute format: ``http://host/url''.
+<P></P>
+<DT><STRONG><A NAME="item_NoCache"><CODE>void NoCache()</CODE></A></STRONG><BR>
+<DD>
+Disables browser document caching.
+<P></P></DL>
+<P>
+<HR>
+<H1><A NAME="author">AUTHOR</A></H1>
+<P>Dmitry Koteroff &lt;<A HREF="mailto:dmitry@koteroff.ru">dmitry@koteroff.ru</A>&gt;, <A HREF="http://dklab.ru/chicken/4.html">http://dklab.ru/chicken/4.html</A></P>
+<P>
+<HR>
+<H1><A NAME="see also">SEE ALSO</A></H1>
+<P><CODE>CGI::WebIn</CODE>, <CODE>Carp</CODE>.</P>
+
+</BODY>
+
+</HTML>
