@@ -25,4 +25,7 @@ Revision history for Perl extension CGI::WebOut.
     
 2.02  Thu 23 Oct 21:35:05 2003
     - fixed memory leak under FastCGI    
+
+2.10  Wed Dec 31 22:00:00 2003
+    - Published to CPAN.
     

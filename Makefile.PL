@@ -7,5 +7,5 @@ WriteMakefile(
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT => 'Perl extension for handle CGI output', # retrieve abstract from module
-       AUTHOR   => 'Dmitry Koteroff <dmitry@koteroff.ru>') : ()),
+       AUTHOR   => 'Dmitry Koteroff <koteroff@cpan.org>') : ()),
 );

@@ -13,7 +13,7 @@
 #   including module, all works correctly and transparently.
 #
 package CGI::WebOut;
-our $VERSION = "2.02";
+our $VERSION = "2.10";
 
 use strict;
 use Exporter; our @ISA=qw(Exporter);
@@ -201,7 +201,7 @@ sub Flush() {
 	# Если заголовки еще не отосланы, отослать их
 	if (!$HeadersSent && IsWebMode()) {
 		my $ContType="text/html";
-		unshift(@Headers,"X-Powered-By: CGI::WebOut v$VERSION (http://www.dklab.ru/chicken/4.html) by Dmitry Koteroff, (C) 2000-2003.");
+		unshift(@Headers,"X-Powered-By: CGI::WebOut v$VERSION (http://www.dklab.ru/chicken/4.html) by Dmitry Koteroff, (C) 2000-2004.");
 		# Ищем Content-type, чтобы потом отправить его в конце
 		for (my $i=0; $i<@Headers; $i++) {
 			if ($Headers[$i]=~/^content-type: *(.*)$/i) {
@@ -876,7 +876,7 @@ Disables browser document caching.
 
 =head1 AUTHOR
 
-Dmitry Koteroff <dmitry@koteroff.ru>, http://dklab.ru/chicken/4.html
+Dmitry Koteroff <koteroff@cpan.org>, http://dklab.ru/chicken/4.html
 
 =head1 SEE ALSO
 
