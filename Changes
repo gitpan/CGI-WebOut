@@ -31,3 +31,6 @@ Revision history for Perl extension CGI::WebOut.
 
 2.20  Fri Feb 13 19:00:00 2004
     - Now module is more tie-safe and can be used after CGI::WebGzip.
+
+2.22  Thu May 5 16:00:00 2005
+    - Removed broken WebOut.htm from MANIFEST.

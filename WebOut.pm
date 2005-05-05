@@ -13,7 +13,7 @@
 #   including module, all works correctly and transparently.
 #
 package CGI::WebOut;
-our $VERSION = "2.21";
+our $VERSION = "2.22";
 
 use strict;
 use Exporter; our @ISA=qw(Exporter);
@@ -790,7 +790,7 @@ but Rasmus does not think so.
 
 =item C<use CGI::WebOut [($forgotAboutHeaders)]>
 
-Handles the C<STDOUT> to avoid document output without C<Content-type> header in "PHP-style". If C<$forgotAboutHeaders> is true, following "print" will produse output of all HTTP headers. Use this options only in FastCGI environment.
+Handles the C<STDOUT> to avoid document output without C<Content-type> header in "PHP-style". If C<$forgotAboutHeaders> is true, following "print" will produce output of all HTTP headers. Use this options only in FastCGI environment.
 
 
 =item C<string grab { ... }>
@@ -887,7 +887,7 @@ Disables browser document caching.
 
 =head1 AUTHOR
 
-Dmitry Koteroff <koteroff@cpan.org>, http://dklab.ru/chicken/4.html
+Dmitry Koterov <koterov@cpan.org>, http://dklab.ru/chicken/4.html
 
 =head1 SEE ALSO
 
