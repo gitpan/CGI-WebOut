@@ -34,3 +34,6 @@ Revision history for Perl extension CGI::WebOut.
 
 2.22  Thu May 5 16:00:00 2005
     - Removed broken WebOut.htm from MANIFEST.
+
+2.23  Fri Sep 9 15:00:00 2005
+    - Added method FILENO to tied STDOUT object (compatibility with CGI.pm & Perl 5.8).

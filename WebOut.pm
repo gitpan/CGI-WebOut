@@ -13,7 +13,7 @@
 #   including module, all works correctly and transparently.
 #
 package CGI::WebOut;
-our $VERSION = "2.22";
+our $VERSION = "2.23";
 
 use strict;
 use Exporter; our @ISA=qw(Exporter);
@@ -435,8 +435,14 @@ sub CLOSE
   $this->parentCall(sub { close(*{$this->{handle}}) });
 }
 sub BINMODE 
-{   my ($this) = @_;
+{ my ($this) = @_;
   $this->parentCall(sub { binmode(*{$this->{handle}}) });
+}
+sub FILENO
+{ my ($this) = @_;
+  CGI::WebOut::Flush();
+  $this->parentCall(sub { return fileno(*{$this->{handle}}) });
+  return 0;
 }
 
 # Untie process is fully transparent for parent. For example, code:
