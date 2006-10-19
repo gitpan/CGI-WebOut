@@ -37,3 +37,7 @@ Revision history for Perl extension CGI::WebOut.
 
 2.23  Fri Sep 9 15:00:00 2005
     - Added method FILENO to tied STDOUT object (compatibility with CGI.pm & Perl 5.8).
+
+2.24  Thu Oct 19 13:00:00 2005
+    - If undefined variable is used in print after CGI::WebOut start, generate error
+      message in context of caller code, not in context of library.

@@ -13,7 +13,7 @@
 #   including module, all works correctly and transparently.
 #
 package CGI::WebOut;
-our $VERSION = "2.23";
+our $VERSION = "2.24";
 
 use strict;
 use Exporter; our @ISA=qw(Exporter);
@@ -408,9 +408,9 @@ sub tieobj {
 }
 
 ## Fully overriden methods.
-sub WRITE  { shift; return CGI::WebOut::echo(@_); }
-sub PRINT  { shift; return CGI::WebOut::echo(@_); }
-sub PRINTF { shift; return CGI::WebOut::echo(sprintf(@_)); }
+sub WRITE  { shift; goto &CGI::WebOut::echo; }
+sub PRINT  { shift; goto &CGI::WebOut::echo; }
+sub PRINTF { shift; @_ = sprintf(@_); goto &CGI::WebOut::echo; }
 
 # Creates the new tie. Saves the old object and handle reference.
 # See synopsis above.
@@ -667,7 +667,7 @@ sub __PrintAllErrors()
   if (IsWebMode) {
     if ($ErrorReporting == ER_Err2Browser) {
       # мало ли, какие там были таблицы...
-      echo "</script>","</table>"x6,"</pre>"x3,"</tt>"x2,"</i>"x2,"</b>"x2;
+      echo "</script>","</xmp>","</pre>","</table>"x6,"</tt>"x2,"</i>"x2,"</b>"x2,"</div>"x10,"\n";
     }
     my %wasErr=();
     for (my $i=0; $i<@Errors; $i++) {
