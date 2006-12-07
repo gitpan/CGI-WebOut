@@ -41,3 +41,6 @@ Revision history for Perl extension CGI::WebOut.
 2.24  Thu Oct 19 13:00:00 2005
     - If undefined variable is used in print after CGI::WebOut start, generate error
       message in context of caller code, not in context of library.
+
+2.25  Thu Dec 7 15:00:00 2006
+    - Do not call Flush() on FILENO handler (compatibility with CGI::Session & CGI).

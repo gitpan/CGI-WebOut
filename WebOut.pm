@@ -7,13 +7,8 @@
 # Также позволяет выборочно перехватывать выходной поток скрипта для
 # последующей обработки: $text = grab { print "Hello" }.
 # В общем, полная эмуляция поведения PHP.
-#
-# 23.08.2003
-#   Now CGI::WebOut is fully tie-safe: if somebody ties STDOUT before
-#   including module, all works correctly and transparently.
-#
 package CGI::WebOut;
-our $VERSION = "2.24";
+our $VERSION = "2.25";
 
 use strict;
 use Exporter; our @ISA=qw(Exporter);
@@ -440,7 +435,13 @@ sub BINMODE
 }
 sub FILENO
 { my ($this) = @_;
-  CGI::WebOut::Flush();
+  # Do not call Flush() here, because it is incompatible with CGI::Session.
+  # E.g. the following code will not work if Flush() is uncommented:
+  #   use CGI::WebOut;
+  #   use CGI::Session;
+  #   my $session = new CGI::Session(...);
+  #   SetCookie(...); # says that "headers are already sent"
+  #CGI::WebOut::Flush();
   $this->parentCall(sub { return fileno(*{$this->{handle}}) });
   return 0;
 }
